@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket + Straddle Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        button { margin: 5px 0; padding: 8px; }
+        input { margin: 3px 0; padding: 5px; }
+        #output {
+            height: 300px;
+            overflow-y: auto;
+            background: #111;
+            color: #0f0;
+            padding: 10px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>WebSocket + Straddle API Test</h2>
+
+<button onclick="connectWS()">Connect WebSocket</button>
+<button onclick="disconnectWS()">Disconnect WebSocket</button>
+
+<hr>
+
+<h3>Straddle API</h3>
+
+<input id="category" placeholder="category" value="OPT" /><br>
+<input id="index" placeholder="index" value="NIFTY" /><br>
+<input id="expiry" placeholder="expiry (optional)" /><br>
+<input id="from_date" placeholder="from_date" value="2024-01-01" /><br>
+<input id="to_date" placeholder="to_date" value="2024-01-02" /><br>
+
+<button onclick="sendStraddle()">Send Straddle Request</button>
+
+<hr>
+
+<h3>Output</h3>
+<pre id="output"></pre>
+
+<script>
+    let ws = null;
+    const output = document.getElementById("output");
+
+    function log(message) {
+        output.innerHTML += message + "\n";
+        output.scrollTop = output.scrollHeight;
+    }
+
+    function connectWS() {
+        ws = new WebSocket("ws://192.168.0.121:8010/ws/ticks");
+
+        ws.onopen = () => log("✅ WebSocket Connected");
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            log("📩 " + JSON.stringify(data, null, 2));
+        };
+
+        ws.onerror = (err) => log("❌ WebSocket Error");
+
+        ws.onclose = () => log("🔌 WebSocket Closed");
+    }
+
+    function disconnectWS() {
+        if (ws) {
+            ws.close();
+        }
+    }
+
+    async function sendStraddle() {
+
+        const payload = {
+            category: document.getElementById("category").value,
+            index: document.getElementById("index").value,
+            expiry: document.getElementById("expiry").value || null,
+            from_date: document.getElementById("from_date").value,
+            to_date: document.getElementById("to_date").value
+        };
+
+        const response = await fetch("http://192.168.0.121:8010/api/straddle", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        log("🌐 HTTP Response: " + JSON.stringify(result, null, 2));
+    }
+</script>
+
+</body>
+</html>
