@@ -3,7 +3,7 @@ from api.controller_apis.UI_API import router as UI_api
 from api.controller_apis.historical_data_API import router as historical_data_api
 from api.controller_apis.ws_api import router as ws_api
 from api.controller_apis.demo import router as ws_ap
-from api.controller_apis.self_demo_WS import router as self_demo_WS
+from api.demo_testing_apis.self_demo_WS import router as self_demo_WS
 
 router = APIRouter()
 
